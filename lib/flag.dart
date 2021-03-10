@@ -2,12 +2,7 @@ library flag;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-
-import './platform/interface_svg.dart'
-// ignore: uri_does_not_exist
-    if (dart.library.io) './platform/mobile_svg.dart'
-// ignore: uri_does_not_exist
-    if (dart.library.js) './platform/web_svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 /// A run of Flag.
 class Flag extends StatelessWidget {
@@ -269,12 +264,14 @@ class Flag extends StatelessWidget {
     String countryName = country.toLowerCase();
 
     return flagsCode.contains(countryName)
-        ? PlatformSvg(
-            'packages/flag/res/flag/$countryName.svg',
+        ? Container(
             width: width,
             height: height,
-            semanticLabel: country,
-            fit: fit,
+            child: SvgPicture.asset(
+              'packages/flag/res/flag/$countryName.svg',
+              semanticsLabel: country,
+              fit: fit,
+            ),
           )
         : replacement;
   }
@@ -283,8 +280,13 @@ class Flag extends StatelessWidget {
       {required BuildContext context,
       List<String> flagList = flagsCode}) async {
     for (final flag in flagList) {
-      await PlatformSvg.preloadFlag(
-          context, 'packages/flag/res/flag/$flag.svg');
+      await precachePicture(
+        ExactAssetPicture(
+          SvgPicture.svgStringDecoder,
+          'packages/flag/res/flag/$flag.svg',
+        ),
+        context,
+      );
     }
   }
 }
